@@ -1,2 +1,0 @@
-[console_scripts]
-nextpy = nextpy.default_app:main
