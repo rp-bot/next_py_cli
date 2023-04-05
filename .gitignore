@@ -1,3 +1,3 @@
 .pytest_cache
 build
-nextpy.egg
+nextpy.egg-info
