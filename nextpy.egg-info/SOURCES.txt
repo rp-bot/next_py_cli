@@ -1,0 +1,8 @@
+setup.py
+nextpy/__init__.py
+nextpy/default_app.py
+nextpy.egg-info/PKG-INFO
+nextpy.egg-info/SOURCES.txt
+nextpy.egg-info/dependency_links.txt
+nextpy.egg-info/entry_points.txt
+nextpy.egg-info/top_level.txt

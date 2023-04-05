@@ -1,0 +1,1 @@
+# NextJS Automatic App creator
