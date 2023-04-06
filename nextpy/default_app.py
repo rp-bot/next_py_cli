@@ -1,5 +1,7 @@
 import argparse
 
+# npx create-next-app@latest example6 --js --tailwind --eslint --src-dir --no-experimental-app  --import-alias "@/*"
+
 
 def main():
     parser = argparse.ArgumentParser(description='A simple CLI program.')
