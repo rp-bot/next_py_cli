@@ -4,6 +4,7 @@ import os
 import platform
 
 CWD = os.getcwd()
+
 # npx create-next-app@latest example6 --js --tailwind --eslint --src-dir --no-experimental-app  --import-alias "@/*"
 RP_BOT_COMMAND = """npx create-next-app@latest example6 --js --tailwind --eslint --src-dir --no-experimental-app  --import-alias "@/*"""
 
@@ -18,10 +19,17 @@ def command_maker(argument_dict):
 
 def clean_up(command):
 # clean up files in the directory
-    with open(f"{command[2]}\\tailwind.config.js","r+") as f:
-        print(f.readlines())
-    # x = subprocess.Popen(["dir"], shell=True,cwd=os.getcwd(), text=True)
-
+    with open(f"{command[2]}\\tailwind.config.js","r+") as tailwind_config_js, open(f"{command[2]}\\src\\styles\\globals.css","r+") as globals_css, open(f"{command[2]}\\src\\pages\\index.js","r+") as index_js:
+        tailwind_config_js_list = tailwind_config_js.readlines()
+        tailwind_config_js_list[2]="""    "./app/**/*.{js,ts,jsx,tsx,mdx}","""
+        tailwind_config_js_list[3]="""    "./pages/**/*.{js,ts,jsx,tsx,mdx}","""
+        tailwind_config_js_list[4]="""    "./components/**/*.{js,ts,jsx,tsx,mdx}",\n"""
+        tailwind_config_js_list[5]="""    "./src/**/*.{js,ts,jsx,tsx,mdx}","""
+        tailwind_config_js.writelines(tailwind_config_js_list)
+        for i,line in enumerate(tailwind_config_js_list):
+            print(line,i)
+    x = subprocess.Popen(['cmd', '/c', 'del', f'.\\{command[2]}\\public\\*.svg', ], shell=True, text=True,cwd=CWD)
+    x.wait()
 
 def main():
 
@@ -93,4 +101,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    clean_up(command=['','','hello'])
