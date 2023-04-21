@@ -1,28 +1,26 @@
 import argparse
 import subprocess
+import os
+import platform
 
+CWD = os.getcwd()
 # npx create-next-app@latest example6 --js --tailwind --eslint --src-dir --no-experimental-app  --import-alias "@/*"
 RP_BOT_COMMAND = """npx create-next-app@latest example6 --js --tailwind --eslint --src-dir --no-experimental-app  --import-alias "@/*"""
 
 
-def command_maker(project_name, lang_name, tailwind, eslint, experimental_app, src_dir, import_alias, alias_string, bootstrap_client, help, create_command="create-next-app@latest", version=""):
-    if version != "":
-        create_command = "create-next-app@latest"
-    else:
-        create_command+version
-    command = ["npx",
-               create_command,
-               project_name,
-               lang_name,
-               tailwind,
-               eslint,
-               experimental_app,
-               src_dir,
-               import_alias,
-               alias_string,
-               bootstrap_client,
-               help]
+def command_maker(argument_dict):
+    # TODO: classify the essential and non essential arguments to catch errors. 
+    # non_esential=["language", ] 
+    command = []
+    for value in argument_dict.values():
+        if value is not None: command.append(value)
     return command
+
+def clean_up(command):
+# clean up files in the directory
+    with open(f"{command[2]}\\tailwind.config.js","r+") as f:
+        print(f.readlines())
+    # x = subprocess.Popen(["dir"], shell=True,cwd=os.getcwd(), text=True)
 
 
 def main():
@@ -55,33 +53,43 @@ def main():
     # import alias or nah
     parser.add_argument("--no-import-alias", type=str, default="--import-alias",
                         help="Specify if you DON'T WANT the import alias. Default is it imports alias")
-    # Alias string
-    # TODO: Do a condition statement to check whether alias is selected or not.
-    alias_string_arg = None
 
     # bootstrapclient arg
     parser.add_argument("--use-pnpm", type=str, default="--use-npm",
                         help="Specify if you WANT Pnpm. Default is npm")
 
-    parser.add_argument("--next-help", type=str, default="",
+    parser.add_argument("--next-help", type=str, default=None,
                         help="Next JS help")
     args = parser.parse_args()
     # VERSION
-    project_name = args.project_name
-    language = args.typescript
-    tailwind = args.no_tailwind
-    eslint = args.no_eslint
-    src_dir = args.no_src_dir
-    experimental_app = args.experimental_app
-    import_alias = args.no_import_alias
-    alias_string = "@/*"
-    bootstrap_client = args.use_pnpm
-    help_arg = args.next_help  # needs to be converted to --help from --next-help
-    command = command_maker(project_name, language, tailwind, eslint, src_dir,
-                            experimental_app, import_alias, alias_string, bootstrap_client, help_arg)
-    print(command)
+    arguments ={
+        "package_execution": "npx",
+        "create_command": "create-next-app@latest",
+        "version": None,
+        "project_name":args.project_name,
+        "language":args.typescript,
+        "tailwind":args.no_tailwind,
+        "eslint":args.no_eslint,
+        "src_dir" : args.no_src_dir,
+        "experimental_app" : args.experimental_app,
+        "import_alias" : args.no_import_alias,
+        # TODO: Make Alias string customizable
+        "alias_string" : "@/*",
+        "bootstrap_client" : args.use_pnpm,
+        "help_arg" : args.next_help 
+
+    }
+    
+    command = command_maker(arguments)
+    print(" ".join(command))
     x = subprocess.Popen(command, shell=True, text=True)
     x.wait()
+    
+    # Run clean up function if app was created or else dont
+    # TODO override it with another arg
+    clean_up(command) if not x.poll() else None
+    
+
 
 
 if __name__ == '__main__':
