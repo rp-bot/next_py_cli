@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="nextpy",
-    version="0.0.1",
+    version="0.0.2",
     author="rp-bot",
     author_email="prathamvadhulas@gmail.com",
     description=("Python program that automates creating a nextjs app "),

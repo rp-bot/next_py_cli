@@ -17,19 +17,57 @@ def command_maker(argument_dict):
         if value is not None: command.append(value)
     return command
 
-def clean_up(command):
+def clean_up(project_name):
 # clean up files in the directory
-    with open(f"{command[2]}\\tailwind.config.js","r+") as tailwind_config_js, open(f"{command[2]}\\src\\styles\\globals.css","r+") as globals_css, open(f"{command[2]}\\src\\pages\\index.js","r+") as index_js:
-        tailwind_config_js_list = tailwind_config_js.readlines()
-        tailwind_config_js_list[2]="""    "./app/**/*.{js,ts,jsx,tsx,mdx}","""
-        tailwind_config_js_list[3]="""    "./pages/**/*.{js,ts,jsx,tsx,mdx}","""
-        tailwind_config_js_list[4]="""    "./components/**/*.{js,ts,jsx,tsx,mdx}",\n"""
-        tailwind_config_js_list[5]="""    "./src/**/*.{js,ts,jsx,tsx,mdx}","""
-        tailwind_config_js.writelines(tailwind_config_js_list)
-        for i,line in enumerate(tailwind_config_js_list):
-            print(line,i)
-    x = subprocess.Popen(['cmd', '/c', 'del', f'.\\{command[2]}\\public\\*.svg', ], shell=True, text=True,cwd=CWD)
+    with open(f"{project_name}\\tailwind.config.js","w+") as tailwind_config_js, open(f"{project_name}\\src\\styles\\globals.css","w+") as globals_css, open(f"{project_name}\\src\\pages\\index.js","w+") as index_js:
+        # tailwind_config_js_list = tailwind_config_js.readlines()
+        # globals_css_list = globals_css.readlines()
+        # index_js_list = index_js.readlines()
+        tailwind_config_js.writelines(
+            """/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}""")
+
+        globals_css.writelines(
+            """@tailwind base;
+@tailwind components;
+@tailwind utilities;"""
+        )
+
+        index_js.writelines(
+            """export default function Home() {
+	return (
+		<div className="bg-black">
+			<div>Home Page</div>
+		</div>
+	);
+}"""
+        )
+    x = subprocess.Popen(['cmd', '/c', 'del', f'.\\{project_name}\\public\\*.svg', ], shell=True, text=True,cwd=CWD)
     x.wait()
+
+def auto_start_app(project_name,no_auto_arg=None):
+    if no_auto_arg is None:
+        # change to specified project dir
+        os.chdir(os.path.join(project_name))
+
+        install_command = subprocess.Popen(['npm','install'], shell=True, text=True,cwd=os.getcwd())
+        install_command.wait()
+
+        run_command = subprocess.Popen(['npm','run', 'dev'], shell=True, text=True,cwd=os.getcwd())
+        run_command.wait()
+
+    else: print("App was created and then wasn't started")
 
 def main():
 
@@ -68,9 +106,13 @@ def main():
 
     parser.add_argument("--next-help", type=str, default=None,
                         help="Next JS help")
+    
+    parser.add_argument("--no-auto-start", type=str, default=None,
+                        help="Automatically start development server")
+
     args = parser.parse_args()
     # VERSION
-    arguments ={
+    main_arguments ={
         "package_execution": "npx",
         "create_command": "create-next-app@latest",
         "version": None,
@@ -84,22 +126,28 @@ def main():
         # TODO: Make Alias string customizable
         "alias_string" : "@/*",
         "bootstrap_client" : args.use_pnpm,
-        "help_arg" : args.next_help 
-
+        
     }
+    other_arguments = {"no_auto":args.no_auto_start}
     
-    command = command_maker(arguments)
-    print(" ".join(command))
-    x = subprocess.Popen(command, shell=True, text=True)
+
+    #  construct command
+    main_command = command_maker(main_arguments)
+
+    
+    # run command
+    x = subprocess.Popen(main_command, shell=True, text=True)
     x.wait()
     
     # Run clean up function if app was created or else dont
-    # TODO override it with another arg
-    clean_up(command) if not x.poll() else None
+    clean_up(main_command[2]) if not x.poll() else None
+
+    # Start app
+    auto_start_app(main_command[2]) 
     
 
 
 
 if __name__ == '__main__':
-    # main()
-    clean_up(command=['','','hello'])
+    main()
+    
