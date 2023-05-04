@@ -4,9 +4,7 @@ import os
 import platform
 
 CWD = os.getcwd()
-
-# npx create-next-app@latest example6 --js --tailwind --eslint --src-dir --no-experimental-app  --import-alias "@/*"
-RP_BOT_COMMAND = """npx create-next-app@latest example6 --js --tailwind --eslint --src-dir --no-experimental-app  --import-alias "@/*"""
+OS = platform.system()
 
 
 def command_maker(argument_dict):
@@ -19,10 +17,7 @@ def command_maker(argument_dict):
 
 def clean_up(project_name):
 # clean up files in the directory
-    with open(f"{project_name}\\tailwind.config.js","w+") as tailwind_config_js, open(f"{project_name}\\src\\styles\\globals.css","w+") as globals_css, open(f"{project_name}\\src\\pages\\index.js","w+") as index_js:
-        # tailwind_config_js_list = tailwind_config_js.readlines()
-        # globals_css_list = globals_css.readlines()
-        # index_js_list = index_js.readlines()
+    with open(f"{project_name}/tailwind.config.js","w+") as tailwind_config_js, open(f"{project_name}/src/styles/globals.css","w+") as globals_css, open(f"{project_name}/src/pages/index.js","w+") as index_js:
         tailwind_config_js.writelines(
             """/** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -53,6 +48,8 @@ module.exports = {
 	);
 }"""
         )
+    
+    # FIXME this is os specific need to make it universal
     x = subprocess.Popen(['cmd', '/c', 'del', f'.\\{project_name}\\public\\*.svg', ], shell=True, text=True,cwd=CWD)
     x.wait()
 
