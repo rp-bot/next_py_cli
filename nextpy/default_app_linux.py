@@ -3,9 +3,6 @@ import subprocess
 import os
 import platform
 
-CWD = os.getcwd()
-OS = platform.system()
-
 
 def command_maker(argument_dict):
     # TODO: classify the essential and non essential arguments to catch errors.
@@ -17,70 +14,12 @@ def command_maker(argument_dict):
     return command
 
 
-def clean_up(project_name):
-    # clean up files in the directory
-    with open(f"{project_name}/tailwind.config.js", "w+") as tailwind_config_js, open(f"{project_name}/src/styles/globals.css", "w+") as globals_css, open(f"{project_name}/src/pages/index.js", "w+") as index_js:
-        tailwind_config_js.writelines(
-            """/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-}""")
-
-        globals_css.writelines(
-            """@tailwind base;
-@tailwind components;
-@tailwind utilities;"""
-        )
-
-        index_js.writelines(
-            """export default function Home() {
-	return (
-		<div className="bg-black">
-			<div>Home Page</div>
-		</div>
-	);
-}"""
-        )
-
-    # FIXME this is os specific need to make it universal
-    x = subprocess.Popen(
-        ['cmd', '/c', 'del', f'.\\{project_name}\\public\\*.svg', ], shell=True, text=True, cwd=CWD)
-    x.wait()
-
-
-def auto_start_app(project_name, no_auto_arg=None):
-    if no_auto_arg is None:
-        # change to specified project dir
-        os.chdir(os.path.join(project_name))
-
-        install_command = subprocess.Popen(
-            ['npm', 'install'], shell=True, text=True, cwd=os.getcwd())
-        install_command.wait()
-
-        run_command = subprocess.Popen(
-            ['npm', 'run', 'dev'], shell=True, text=True, cwd=os.getcwd())
-        run_command.wait()
-
-    else:
-        print("App was created and then wasn't started")
-
-
 def main():
-
     parser = argparse.ArgumentParser(
         description='Another unnecessary level of automation.')
 
     # ProjectName
-    parser.add_argument("project_name", type=str,
+    parser.add_argument("--project_name", type=str, default="example",
                         help="Type the name of the nextjs project. This will also be the name of your folder.")
     # Type script or javascript
     parser.add_argument("--typescript", "--ts", type=str, default="--js",
@@ -116,7 +55,7 @@ def main():
                         help="Automatically start development server")
 
     args = parser.parse_args()
-    # VERSION
+
     main_arguments = {
         "package_execution": "npx",
         "create_command": "create-next-app@latest",
@@ -133,21 +72,21 @@ def main():
         "bootstrap_client": args.use_pnpm,
 
     }
+
     other_arguments = {"no_auto": args.no_auto_start}
 
-    #  construct command
     main_command = command_maker(main_arguments)
+    main_command = " ".join(main_command)
 
-    # run command
-    x = subprocess.Popen(main_command, shell=True, text=True)
-    x.wait()
-
-    # Run clean up function if app was created or else dont
-    clean_up(main_command[2]) if not x.poll() else None
-
-    # Start app
-    auto_start_app(main_command[2])
+    # execute the command and wait for it to finish
+    result = subprocess.run(main_command, shell=True,
+                            capture_output=True, text=True)
+    print(result.stdout)
+    # print the output        print(result.stdout)
 
 
 if __name__ == '__main__':
+    CWD = os.getcwd()
+    OS = platform.system()
+
     main()
